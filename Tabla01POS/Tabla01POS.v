@@ -38,6 +38,7 @@ initial begin
   #1 $finish; //fin de las posibilidades
 end
 
+
 initial begin
   $dumpfile("Tabla01POS_tb.vcd"); //nombre del archivo
   $dumpvars(0,Tabla01POS); //nombre del documento
