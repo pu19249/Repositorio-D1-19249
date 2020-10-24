@@ -28,7 +28,7 @@ module testbench();
         end
 
         initial
-        #100 $finish;
+        #25 $finish;
 
         //GTK wave
         initial begin
