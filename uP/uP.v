@@ -42,19 +42,19 @@ module cont12(
     output reg [11:0]cont //salida de 12bits
     );
 
-        always @(posedge clk or posedge reset or loact or load) begin //si LA y load cambia tambien se ejecuta el always
+        always @(posedge clk, posedge reset) begin //si LA y load cambia tambien se ejecuta el always
             if (reset)
-                cont <= 12'b000000000000; //comienza en cero el contador
+                cont = 12'b0; //comienza en cero el contador
             else if (loact)
-                cont <= load; //si el enable esta desactivado, el load pasa a la salida
-            else if (enable)
-                cont <= cont + 1; //a lo que tenia la salida se le suma 1
+                cont = load; //si el enable esta desactivado, el load pasa a la salida
+            else if (enable && !loact)
+                cont = cont + 1; //a lo que tenia la salida se le suma 1
         end
 endmodule
 
 module rom_mem(
-    input wire [11:0]address, //direccion
-    output wire [7:0]data
+    input [11:0]address, //direccion
+    output [7:0]data
     ); 
 
     reg[7:0] my_mem [0:4095]; //8 bits de ancho, 4096 depth memory
@@ -65,9 +65,9 @@ module rom_mem(
     assign data = my_mem[address]; //asignar a la salida la direccion
 endmodule
 
-module Bufftri(input wire [3:0]in,
-               input wire en, 
-               output wire [3:0]out);
+module Bufftri(input [3:0]in,
+               input en, 
+               output [3:0]out);
 
     assign out = en ? in : 4'bz;
 endmodule
@@ -88,35 +88,94 @@ module FFT(input wire clk, reset, output wire Q);
     FFDSE a(clk, reset, ~Q, Q);
 endmodule
 
-module opcode(input wire [6:0]address1, 
-              output reg [12:0]signals);
-  
-    always @(address1)
-            casex(address1)
-                7'bxxxxxx0: signals <= 13'b1000000001000;
-                7'b00001x1: signals <= 13'b0100000001000;
-                7'b00000x1: signals <= 13'b1000000001000;
-                7'b00011x1: signals <= 13'b1000000001000;
-                7'b00010x1: signals <= 13'b0100000001000;
-                7'b0010xx1: signals <= 13'b0001001000010;
-                7'b0011xx1: signals <= 13'b1001001100000;
-                7'b0100xx1: signals <= 13'b0011010000010;
-                7'b0101xx1: signals <= 13'b0011010000100;
-                7'b0110xx1: signals <= 13'b1011010100000;
-                7'b0111xx1: signals <= 13'b1000000111000;
-                7'b1000x11: signals <= 13'b0100000001000;
-                7'b1000x01: signals <= 13'b1000000001000;
-                7'b1001x11: signals <= 13'b1000000001000;
-                7'b1001x01: signals <= 13'b0100000001000;
-                7'b1010xx1: signals <= 13'b0011011000010;
-                7'b1011xx1: signals <= 13'b1011011100000;
-                7'b1100xx1: signals <= 13'b0100000001000;
-                7'b1101xx1: signals <= 13'b0000000001001;
-                7'b1110xx1: signals <= 13'b0011100000010;
-                7'b1111xx1: signals <= 13'b1011100100000;
+module opcode(input phase, input c_flag, input z_flag, input [3:0]instr, 
+              output reg [12:0]salida);
+    reg [6:0]indecode;
+    reg [12:0]signals;
+
+    always @(*) begin
+        indecode[6] <= phase;
+        indecode[5] <= c_flag;
+        indecode[4] <= z_flag;
+        indecode[3:0] <= instr;
+
+            casez(indecode)
+                7'b??????0: signals <= 13'b1000000001000;
+                7'b00001?1: signals <= 13'b0100000001000;
+                7'b00000?1: signals <= 13'b1000000001000;
+                7'b00011?1: signals <= 13'b1000000001000;
+                7'b00010?1: signals <= 13'b0100000001000;
+                7'b0010??1: signals <= 13'b0001001000010;
+                7'b0011??1: signals <= 13'b1001001100000;
+                7'b0100??1: signals <= 13'b0011010000010;
+                7'b0101??1: signals <= 13'b0011010000100;
+                7'b0110??1: signals <= 13'b1011010100000;
+                7'b0111??1: signals <= 13'b1000000111000;
+                7'b1000?11: signals <= 13'b0100000001000;
+                7'b1000?01: signals <= 13'b1000000001000;
+                7'b1001?11: signals <= 13'b1000000001000;
+                7'b1001?01: signals <= 13'b0100000001000;
+                7'b1010??1: signals <= 13'b0011011000010;
+                7'b1011??1: signals <= 13'b1011011100000;
+                7'b1100??1: signals <= 13'b0100000001000;
+                7'b1101??1: signals <= 13'b0000000001001;
+                7'b1110??1: signals <= 13'b0011100000010;
+                7'b1111??1: signals <= 13'b1011100100000;
                 default:    signals <= 13'b1111111111111;
             endcase
+        assign salida = signals;
+    end
                  
+endmodule
+
+module tabla(input [6:0] address, output [12:0] signals);
+    
+    reg [12:0] signalsReg;
+    
+    always @ (address)
+        casez(address)
+            // any
+            7'b????_??0: signalsReg <= 13'b1000_000_001000;
+            // JC
+            7'b0000_1?1: signalsReg <= 13'b0100_000_001000;
+            7'b0000_0?1: signalsReg <= 13'b1000_000_001000;
+            // JNC
+            7'b0001_1?1: signalsReg <= 13'b1000_000_001000;
+            7'b0001_0?1: signalsReg <= 13'b0100_000_001000;
+            // CMPI
+            7'b0010_??1: signalsReg <= 13'b0001_001_000010;
+            // CMPM
+            7'b0011_??1: signalsReg <= 13'b1001_001_100000;
+            // LIT
+            7'b0100_??1: signalsReg <= 13'b0011_010_000010;
+            // IN
+            7'b0101_??1: signalsReg <= 13'b0011_010_000100;
+            // LD
+            7'b0110_??1: signalsReg <= 13'b1011_010_100000;
+            // ST
+            7'b0111_??1: signalsReg <= 13'b1000_000_111000;
+            // JZ
+            7'b1000_?11: signalsReg <= 13'b0100_000_001000;
+            7'b1000_?01: signalsReg <= 13'b1000_000_001000;
+            // JNZ
+            7'b1001_?11: signalsReg <= 13'b1000_000_001000;
+            7'b1001_?01: signalsReg <= 13'b0100_000_001000;
+            // ADDI
+            7'b1010_??1: signalsReg <= 13'b0011_011_000010;
+            // ADDM
+            7'b1011_??1: signalsReg <= 13'b1011_011_100000;
+            // JMP
+            7'b1100_??1: signalsReg <= 13'b0100_000_001000;
+            // OUT
+            7'b1101_??1: signalsReg <= 13'b0000_000_001001;
+            // NANDI
+            7'b1110_??1: signalsReg <= 13'b0011_100_000010;
+            // NANDM
+            7'b1111_??1: signalsReg <= 13'b1011_100_100000;
+            default: signalsReg <= 13'b1111111111111;
+        endcase
+        
+    assign signals = signalsReg;
 endmodule
 
 module FFD(input wire clk, reset, En, D, output reg Q);
@@ -144,6 +203,20 @@ module Flags(input wire clk, reset, En, D1, D0, output wire Q1, Q0);
     FFD b(clk, reset, En, D0, Q0);
 endmodule
 
+//accu
+module FFaccu(input clk, reset, en,
+              input [3:0]D,
+              output reg [3:0]sal_alu);
+
+        always@(posedge clk or reset)begin
+            if (reset)
+                sal_alu <= 4'b0;
+            else if (en)
+                sal_alu <= D;
+        end
+endmodule
+
+
 //cuatro bits
 module FFD4(input wire clk, reset, En,
             input wire [3:0]D4,
@@ -162,71 +235,105 @@ module FFD8(input wire clk, reset, En,
     FFD4 b(clk, reset, En, D8[3:0], Q8b);
 endmodule
 
-module ALU(
-    input wire [3:0]A, //entrada A
-    input wire [3:0]B, //entrada b
-    input wire [2:0]S, //selector
-    output reg [3:0]Y,
-    output reg Carry,
-    output reg Zero //salida de ALU
-                    );
-
-    reg [4:0]Q; //registro interno de 5 bits para verificar el carry
-    always@(A, B, S) //verificar cambios en A, B o S
-        begin
-            case(S)
-                3'b000: begin
-                            Q = 5'b00000; //resetear el valor del registro
-                            Q = A; //bits de A pasan a Q
-                            Carry = 1'b0; //no va a haber carry
-                            Zero = (Q == 5'b00000) ?1 :0; //no hay operaciones
-                            Y = Q[3:0]; //solo quiero cuatro bits en la sal. Alu
-                        end    //deja pasar A
-                3'b010: begin
-                            Q = 5'b00000; //resetear el valor del registro
-                            Q = B;
-                            Carry = 1'b0;
-                            Zero = (Q == 5'b00000) ? 1:0;
-                            Y = Q[3:0];
-                        end //deja pasar B
-                3'b100: begin
-                            Q = 5'b00000;
-                            Q = ~(A & B);
-                            Carry = 1'b0;
-                            Zero = (Q == 5'b00000) ? 1:0;
-                            Y = Q[3:0];
-                        end //nand
-                3'b001: begin //compare
-                            Q = 5'b00000;
-                            Q = A - B;
-                            Y = Q[3:0];
-                            Carry = Q[4]; //el bit mas sig. se asigna al reg del carry
-                            Zero = (Q == 5'b00000) ? 1:0; //si el reg Q es 0, flag zero = 1
-                        end
-                3'b011: begin
-                        Q = 5'b00000;
-                        Q = A + B; //add
-                        Y = Q[3:0];
-                        Carry = Q[4];
-                        Zero = (Q == 5'b00000) ? 1:0;
-                        end
-            endcase
+//NUEVO MODULO PARA EL FETCH
+module fetch(input clk, reset, en, input wire [7:0]program_byte,
+             output  reg [3:0]instr,
+             output  reg [3:0]oprnd);
+    //reg [3:0]instr;
+    //reg [3:0]oprnd;
+    always@(posedge clk or posedge reset) begin
+        if (reset) begin
+            instr <= 4'b0;
+            oprnd <= 4'b0;
         end
+        else begin
+            instr <= program_byte[7:4];
+            oprnd <= program_byte[3:0];
+        end
+    end
+endmodule
+
+module ALU(input [3:0] A, B,
+           input [2:0] F,
+           output Carry, Zero,
+           output [3:0] S);
+    
+    reg [4:0] regS;
+    
+    always @ (A, B, F)
+        case (F)
+            3'b000: regS = A;
+            3'b001: regS = A - B;
+            3'b010: regS = B;
+            3'b011: regS = A + B;
+            3'b100: regS = {1'b0, ~(A & B)};
+            default: regS = 5'b10101;
+        endcase
+    
+    assign S = regS[3:0];
+    assign Carry = regS[4];
+    assign Zero = ~(regS[3] | regS[2] | regS[1] | regS[0]);
+    
 endmodule
 
 //ensamble de todos los modulos
-module uP(input wire clock, reset,
-          input wire [3:0]pushbuttons,
-          output wire phase, c_flag, z_flag,
-          output wire [3:0]instr,
-          output wire [3:0]oprnd,
-          output wire [3:0]data_bus,
-          output wire [3:0]FF_out,
-          output wire [3:0]accu, 
-          output wire [7:0]program_byte,
-          output wire [11:0]PC,
-          output wire [11:0]address_RAM);
+module uP(input clock, reset,
+          input [3:0]pushbuttons,
+          output phase, c_flag, z_flag,
+          output [3:0]instr,
+          output [3:0]oprnd,
+          output [3:0]data_bus,
+          output [3:0]FF_out,
+          output [3:0]accu, 
+          output [7:0]program_byte,
+          output [11:0]PC,
+          output [11:0]address_RAM);
+        
+          //declaracion de cables para interconexiones
+          wire clock, reset;
+          wire [3:0]pushbuttons;
+          wire phase, c_flag, z_flag;
+          wire [3:0]instr;
+          wire [3:0]oprnd;
+          wire [3:0]data_bus;
+          wire [3:0]FF_out;
+          wire [3:0]accu;
+          wire [7:0]program_byte;
+          wire [11:0]PC;
+          wire [11:0]address_RAM;
 
+          assign address_RAM = {oprnd, program_byte};
+
+          wire Carry, Zero;
+          wire [3:0]sal_alu;
+          wire [12:0]control_signals;
+          wire [6:0]indecode;
+          assign indecode = {instr, c_flag, z_flag, phase};
+
+          //instanciacion de modulos
+          cont12 progra_counter(clock, reset, control_signals[12], control_signals[11], address_RAM, PC);
+          rom_mem rom(PC, program_byte);
+          FFD8 fetch(clock, reset, ~phase, program_byte, instr, oprnd);
+          FFT phasemodule(clock, reset, phase);
+          FFD2 flags(clock, reset, control_signals[9], {Zero, Carry}, {z_flag, c_flag});
+          tabla decode(indecode, control_signals);
+          Bufftri bufffetch(oprnd, control_signals[1], data_bus);
+          ALU alu(accu, data_bus, control_signals[8:6], Carry, Zero, sal_alu);
+          FFaccu accumulador(clock, reset, control_signals[10], sal_alu, accu);
+          Bufftri buffalu(sal_alu, control_signals[3], data_bus);
+          FFD4 outputs(clock, reset, control_signals[0], data_bus, FF_out);
+          Bufftri buffinputs(pushbuttons, control_signals[2], data_bus);
+          RAM ram(address_RAM, control_signals[5], control_signals[4], data_bus);
+
+          /*//hay cables de las entradas y salidas que tambien funcionan como cables internos
+          wire [11:0]PC;
+          wire [7:0]program_byte;
+          wire [3:0]oprnd;
+          wire [3:0]instr;
+          wire c_flag, z_flag, phase;
+          wire [3:0]data_bus;
+          wire [3:0]accu;
+          wire [11:0]address_RAM;
           //control signals
           wire [12:0]control_signals; //salida del decode
           
@@ -251,20 +358,41 @@ module uP(input wire clock, reset,
           wire [3:0]sal_alu;
           assign address_RAM = {oprnd, program_byte}; //concatenacion de cables para la ram
           assign indecode = {phase, c_flag, z_flag, instr}; //concatenacion de entradas del decode
+          wire phasenegado;
+          assign phasenegado = ~phase;
 
           //instanciacion de modulos
-          cont12 A(.clk(clock), .reset(reset), .enable(incPC), .loact(loadPC), .load(address_RAM), .cont(PC)); //PC
-          rom_mem B(.address(PC), .data(program_byte)); //ROM
-          FFD8 C(.clk(clock), .reset(reset), .En(~phase), .D8(program_byte), .Q8a(instr), .Q8b(oprnd)); //FETCH
-          Flags D(.clk(clock), .reset(reset), .En(loadFlags), .D1(Carry), .D0(Zero), .Q1(c_flag), .Q0(z_flag));//FLAGS
-          FFT E(.clk(clock), .reset(reset), .Q(phase)); //PHASE
-          Bufftri F(.in(oprnd), .en(oeOprnd), .out(data_bus)); //Buff de data bus
-          Bufftri G(.in(sal_alu), .en(oeALU), .out(data_bus)); //Buff de alu
-          Bufftri H(.in(pushbuttons), .en(oeIN), .out(data_bus)); //Buffer inputs
-          FFD4 I(.clk(clock), .reset(reset), .En(loadOut), .D4(data_bus), .Q4(FF_out)); //OUTPUTS
-          RAM J(.address_ram(address_RAM), .cs(csRAM), .we(weRAM), .data(data_bus)); //RAM
-          opcode K(.address1(indecode), .signals(control_signals)); //DECODE
-          ALU L(.A(data_bus), .B(accu), .S(S), .Y(sal_alu), .Carry(Carry), .Zero(Zero));//ALU
-          FFD4 M(.clk(clock), .reset(reset), .En(loadA), .D4(sal_alu), .Q4(accu)); //ACCUMULATOR
+          cont12 PCblock(clock, reset, control_signals[12], control_signals[11], address_RAM,PC); //PC
+          rom_mem rom(PC, program_byte); //ROM
+          FFD8 fetch(clock, reset, phasenegado, program_byte, instr, oprnd); //FETCH
+          Flags flags(clock, reset, control_signals[9], Carry, Zero, c_flag, z_flag);//FLAGS
+          FFT phaseblock(clock, reset, phase); //PHASE
+          Bufftri bufftri(oprnd,control_signals[1], data_bus); //Buff de data bus
+          Bufftri buffalu(sal_alu, control_signals[3], data_bus); //Buff de alu
+          Bufftri buffinputs(pushbuttons, control_signals[2], data_bus); //Buffer inputs
+          FFD4 outputs(clock, reset, control_signals[0], data_bus, FF_out); //OUTPUTS
+          RAM ram(address_RAM, control_signals[5], control_signals[4], data_bus); //RAM
+          opcode decode(phase, c_flag, z_flag, instr, control_signals); //DECODE
+          ALU alu(accu, data_bus, control_signals[8:6], Carry, Zero, sal_alu);//ALU
+          FFD4 accublock(clock, reset, control_signals[10], sal_alu, accu); //ACCUMULATOR*/
+
+endmodule
+
+module CircuitoA(input wire clk,
+                reset,
+                en_PC,
+                en_Fetch,
+                loact,
+                input wire [11:0]load,
+                output wire [3:0]instr,
+                output wire [3:0]oprnd,
+                output wire [7:0]program_byte /*sale de program ROM
+                                              y entra a Fetch*/);
+                                                      
+    wire [11:0]cont;
+
+cont12 a(clk, reset, en_PC, loact, load, cont);
+rom_mem b(cont, program_byte);
+FFD8 c(clk, reset, en_Fetch, program_byte, instr, oprnd);
 
 endmodule

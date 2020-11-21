@@ -403,3 +403,115 @@ module testbench();
     end
 
 endmodule
+
+// module tb();
+//     reg clock; 
+//     reg reset; 
+//     reg enable; 
+//     reg loact;
+//     reg [11:0]load;
+//     wire [11:0]cont;
+
+//     cont12 A(clock, reset, enable, loact, load, cont);
+//     initial begin
+//         #1
+//         $display("TB modulo individuales");
+//         $monitor("%b %b %b %b %b | %b", clock, reset, enable, loact, load, cont);
+//         clock = 0; reset = 1; enable = 0; loact = 0; load = 0;
+//         #7 reset = 0; enable = 0; loact = 0;
+//         #14 enable = 1; loact = 0;
+//         #21 loact = 1; load = 12'b01010101010;
+
+//     end
+
+//     initial
+//     #50 $finish;
+
+//     initial begin
+//         $dumpfile("uP_tb.vcd");
+//         $dumpvars(0, tb);
+//     end
+//     always
+//         #5 clock = ~ clock;
+// endmodule
+
+/*module testbench();
+    reg [11:0]address;
+    wire [7:0]data;
+
+    rom_mem memtb(address, data);
+        
+        initial begin
+        $display("\n");
+        $display("Testbench memory rom");
+        $display("--------------------");
+        $display("    Address         |      Data    ");
+        $monitor("    %b    |    %b    ", address, data); //leer los datos del archivo
+        address = 12'b000000000000; //0
+        #1 address = 12'b000000000001; //1
+        #1 address = 12'b000000000010; //2
+        #1 address = 12'b000000000011; //3
+        #1 address = 12'b000000000100; //4
+        #1 address = 12'b000000000101; //5
+        #1 address = 12'b000000000110; //6
+        #1 address = 12'b000000000111; //7
+        #1 address = 12'b000000001000; //8
+        #1 address = 12'b000000001001; //9
+        #1 address = 12'b000000001010; //10
+        #1 address = 12'b000000001011; //11
+        #1 address = 12'b000000001100; //12
+        end
+
+        initial
+        #25 $finish;
+
+        //GTK wave
+        initial begin
+            $dumpfile("uP_tb.vcd"); //nombre del documento
+            $dumpvars(0, testbench); //modulo de testbench
+        end
+
+endmodule
+
+/*module tb();
+
+    reg clk;
+    reg reset;
+    reg en_PC;
+    reg en_Fetch;
+    reg loact;
+    reg [11:0]load;
+    wire [3:0]instr;
+    wire [3:0]oprnd;
+    wire [7:0]program_byte;
+
+    always
+    #5 clk = ~clk;
+
+    CircuitoA a(clk, reset, en_PC, en_Fetch, loact, load, instr, oprnd, program_byte);
+
+    initial begin
+        #1
+        $display("\n");
+        $display("-------------------------Testbench Circuito A--------------------------------------------");
+        $display(" clk | rst | en_PC | en_Fetch | loact |    load        ||  instr | oprnd  |  program_byte ");
+        $display("-----------------------------------------------------------------------------------------");
+        $monitor(" %b   | %b   |   %b   |    %b     |  %b    | %b   || %b   | %b   |  %b ", clk, reset, en_PC, en_Fetch, loact, load, instr, oprnd, program_byte);
+        clk = 0; reset = 1; en_PC = 0; en_Fetch = 0; loact = 0; load = 12'b000000000000;
+        #2 reset = 0; en_PC = 1; en_Fetch = 1; loact = 0; //deberia desplegar el valor que hay en address 1
+        #7 reset = 0; en_PC = 1; en_Fetch = 1; loact = 0; //no hay nada en esa localidad
+        #12 reset = 0; en_PC = 1; en_Fetch = 1; loact = 1; load = 12'b000000010000; //deberia desplegar la pos. 12
+        #17 reset = 0; en_PC = 1; en_Fetch = 1; loact = 0;
+        #22 reset = 0; en_PC = 1; en_Fetch = 1; loact = 1; load = 12'b000100000000;
+    end
+
+    initial 
+    #40 $finish;
+
+    //GTK WAVE
+    initial begin
+        $dumpfile("uP_tb.vcd");
+        $dumpvars(0, tb);
+    end
+
+endmodule*/

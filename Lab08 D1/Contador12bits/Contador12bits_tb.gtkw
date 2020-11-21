@@ -1,0 +1,27 @@
+[*]
+[*] GTKWave Analyzer v3.3.77 (w)1999-2016 BSI
+[*] Sat Nov 21 04:34:10 2020
+[*]
+[dumpfile] "C:\Users\jpu20\Documents\GitHub\Repositorio D1 19249\Lab08 D1\Contador12bits\Contador12bits_tb.vcd"
+[dumpfile_mtime] "Sat Nov 21 04:33:25 2020"
+[dumpfile_size] 1339
+[savefile] "C:\Users\jpu20\Documents\GitHub\Repositorio D1 19249\Lab08 D1\Contador12bits\Contador12bits_tb.gtkw"
+[timestart] 7
+[size] 1000 600
+[pos] -1 -1
+*-1.921819 12 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 197
+[signals_width] 145
+[sst_expanded] 1
+[sst_vpaned_height] 153
+@28
+testbench.clk
+testbench.reset
+testbench.enable
+testbench.loact
+@22
+testbench.load[11:0]
+@23
+testbench.cont[11:0]
+[pattern_trace] 1
+[pattern_trace] 0

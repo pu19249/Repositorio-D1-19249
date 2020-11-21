@@ -1,0 +1,73 @@
+$date
+	Sat Nov 21 00:46:49 2020
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module testbench $end
+$var wire 8 ! data [7:0] $end
+$var reg 12 " address [11:0] $end
+$scope module memtb $end
+$var wire 12 # address [11:0] $end
+$var wire 8 $ data [7:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+b1001111 $
+b0 #
+b0 "
+b1001111 !
+$end
+#1
+b11011111 !
+b11011111 $
+b1 "
+b1 #
+#2
+b1110001 !
+b1110001 $
+b10000 "
+b10000 #
+#3
+b10001 !
+b10001 $
+b10001 "
+b10001 #
+#4
+b1001010 !
+b1001010 $
+b10010 "
+b10010 #
+#5
+b1110010 !
+b1110010 $
+b10011 "
+b10011 #
+#6
+b100010 !
+b100010 $
+b10100 "
+b10100 #
+#7
+bx !
+bx $
+b100000000 "
+b100000000 #
+#8
+b100000001 "
+b100000001 #
+#9
+b100000010 "
+b100000010 #
+#10
+b100000011 "
+b100000011 #
+#11
+b100000100 "
+b100000100 #
+#25
