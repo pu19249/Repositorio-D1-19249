@@ -73,7 +73,6 @@ module Bufftri(input [3:0]in,
 endmodule
 
 //PHASE
-
 module FFDSE(input wire clk, reset, D, output reg Q);
     always@(posedge clk or posedge reset) begin
         if(reset)
@@ -86,46 +85,6 @@ endmodule
 module FFT(input wire clk, reset, output wire Q);
 
     FFDSE a(clk, reset, ~Q, Q);
-endmodule
-
-module opcode(input phase, input c_flag, input z_flag, input [3:0]instr, 
-              output reg [12:0]salida);
-    reg [6:0]indecode;
-    reg [12:0]signals;
-
-    always @(*) begin
-        indecode[6] <= phase;
-        indecode[5] <= c_flag;
-        indecode[4] <= z_flag;
-        indecode[3:0] <= instr;
-
-            casez(indecode)
-                7'b??????0: signals <= 13'b1000000001000;
-                7'b00001?1: signals <= 13'b0100000001000;
-                7'b00000?1: signals <= 13'b1000000001000;
-                7'b00011?1: signals <= 13'b1000000001000;
-                7'b00010?1: signals <= 13'b0100000001000;
-                7'b0010??1: signals <= 13'b0001001000010;
-                7'b0011??1: signals <= 13'b1001001100000;
-                7'b0100??1: signals <= 13'b0011010000010;
-                7'b0101??1: signals <= 13'b0011010000100;
-                7'b0110??1: signals <= 13'b1011010100000;
-                7'b0111??1: signals <= 13'b1000000111000;
-                7'b1000?11: signals <= 13'b0100000001000;
-                7'b1000?01: signals <= 13'b1000000001000;
-                7'b1001?11: signals <= 13'b1000000001000;
-                7'b1001?01: signals <= 13'b0100000001000;
-                7'b1010??1: signals <= 13'b0011011000010;
-                7'b1011??1: signals <= 13'b1011011100000;
-                7'b1100??1: signals <= 13'b0100000001000;
-                7'b1101??1: signals <= 13'b0000000001001;
-                7'b1110??1: signals <= 13'b0011100000010;
-                7'b1111??1: signals <= 13'b1011100100000;
-                default:    signals <= 13'b1111111111111;
-            endcase
-        assign salida = signals;
-    end
-                 
 endmodule
 
 module tabla(input [6:0] address, output [12:0] signals);
@@ -216,7 +175,6 @@ module FFaccu(input clk, reset, en,
         end
 endmodule
 
-
 //cuatro bits
 module FFD4(input wire clk, reset, En,
             input wire [3:0]D4,
@@ -276,7 +234,28 @@ module ALU(input [3:0] A, B,
     
 endmodule
 
-//ensamble de todos los modulos
+
+module CircuitoA(input wire clk,
+                reset,
+                en_PC,
+                en_Fetch,
+                loact,
+                input wire [11:0]load,
+                output wire [3:0]instr,
+                output wire [3:0]oprnd,
+                output wire [7:0]program_byte /*sale de program ROM
+                                              y entra a Fetch*/);
+                                                      
+    wire [11:0]cont;
+
+cont12 a(clk, reset, en_PC, loact, load, cont);
+rom_mem b(cont, program_byte);
+FFD8 c(clk, reset, en_Fetch, program_byte, instr, oprnd);
+
+endmodule
+
+
+//ensamble de todos los modulos uP
 module uP(input clock, reset,
           input [3:0]pushbuttons,
           output phase, c_flag, z_flag,
@@ -311,88 +290,19 @@ module uP(input clock, reset,
           assign indecode = {instr, c_flag, z_flag, phase};
 
           //instanciacion de modulos
-          cont12 progra_counter(clock, reset, control_signals[12], control_signals[11], address_RAM, PC);
-          rom_mem rom(PC, program_byte);
-          FFD8 fetch(clock, reset, ~phase, program_byte, instr, oprnd);
-          FFT phasemodule(clock, reset, phase);
-          FFD2 flags(clock, reset, control_signals[9], {Zero, Carry}, {z_flag, c_flag});
-          tabla decode(indecode, control_signals);
-          Bufftri bufffetch(oprnd, control_signals[1], data_bus);
-          ALU alu(accu, data_bus, control_signals[8:6], Carry, Zero, sal_alu);
-          FFaccu accumulador(clock, reset, control_signals[10], sal_alu, accu);
-          Bufftri buffalu(sal_alu, control_signals[3], data_bus);
-          FFD4 outputs(clock, reset, control_signals[0], data_bus, FF_out);
-          Bufftri buffinputs(pushbuttons, control_signals[2], data_bus);
-          RAM ram(address_RAM, control_signals[5], control_signals[4], data_bus);
-
-          /*//hay cables de las entradas y salidas que tambien funcionan como cables internos
-          wire [11:0]PC;
-          wire [7:0]program_byte;
-          wire [3:0]oprnd;
-          wire [3:0]instr;
-          wire c_flag, z_flag, phase;
-          wire [3:0]data_bus;
-          wire [3:0]accu;
-          wire [11:0]address_RAM;
-          //control signals
-          wire [12:0]control_signals; //salida del decode
-          
-          wire incPC, loadPC, loadA, loadFlags, csRAM, weRAM, oeALU, oeIN, oeOprnd, loadOut;
-          wire [2:0]S;
-
-          assign incPC = control_signals[12]; 
-          assign loadPC = control_signals[11];
-          assign loadA = control_signals[10];
-          assign loadFlags = control_signals[9];
-          assign S = control_signals[8:6];
-          assign csRAM = control_signals[5];
-          assign weRAM = control_signals[4];
-          assign oeALU = control_signals[3];
-          assign oeIN = control_signals[2]; 
-          assign oeOprnd = control_signals[1]; 
-          assign loadOut = control_signals[0];
-          
-          //otros cables 
-          wire Carry, Zero;
-          wire [6:0]indecode;
-          wire [3:0]sal_alu;
-          assign address_RAM = {oprnd, program_byte}; //concatenacion de cables para la ram
-          assign indecode = {phase, c_flag, z_flag, instr}; //concatenacion de entradas del decode
-          wire phasenegado;
-          assign phasenegado = ~phase;
-
-          //instanciacion de modulos
-          cont12 PCblock(clock, reset, control_signals[12], control_signals[11], address_RAM,PC); //PC
+          cont12 progra_counter(clock, reset, control_signals[12], control_signals[11], address_RAM, PC); //PC
           rom_mem rom(PC, program_byte); //ROM
-          FFD8 fetch(clock, reset, phasenegado, program_byte, instr, oprnd); //FETCH
-          Flags flags(clock, reset, control_signals[9], Carry, Zero, c_flag, z_flag);//FLAGS
-          FFT phaseblock(clock, reset, phase); //PHASE
-          Bufftri bufftri(oprnd,control_signals[1], data_bus); //Buff de data bus
-          Bufftri buffalu(sal_alu, control_signals[3], data_bus); //Buff de alu
-          Bufftri buffinputs(pushbuttons, control_signals[2], data_bus); //Buffer inputs
-          FFD4 outputs(clock, reset, control_signals[0], data_bus, FF_out); //OUTPUTS
+          FFD8 fetch(clock, reset, ~phase, program_byte, instr, oprnd); //FETCH
+          FFT phasemodule(clock, reset, phase); //PHASE
+          FFD2 flags(clock, reset, control_signals[9], {Zero, Carry}, {z_flag, c_flag}); //FLAGS
+          tabla decode(indecode, control_signals); //DECODE
+          Bufftri bufffetch(oprnd, control_signals[1], data_bus); //BUFFER FETCH
+          ALU alu(accu, data_bus, control_signals[8:6], Carry, Zero, sal_alu); //ALU
+          FFaccu accumulador(clock, reset, control_signals[10], sal_alu, accu); //ACCUMULATOR
+          Bufftri buffalu(sal_alu, control_signals[3], data_bus); //BUFFER ALU
+          FFD4 outputs(clock, reset, control_signals[0], data_bus, FF_out); //FF OUTPUTS
+          Bufftri buffinputs(pushbuttons, control_signals[2], data_bus); //BUFFER INPUTS
           RAM ram(address_RAM, control_signals[5], control_signals[4], data_bus); //RAM
-          opcode decode(phase, c_flag, z_flag, instr, control_signals); //DECODE
-          ALU alu(accu, data_bus, control_signals[8:6], Carry, Zero, sal_alu);//ALU
-          FFD4 accublock(clock, reset, control_signals[10], sal_alu, accu); //ACCUMULATOR*/
 
 endmodule
 
-module CircuitoA(input wire clk,
-                reset,
-                en_PC,
-                en_Fetch,
-                loact,
-                input wire [11:0]load,
-                output wire [3:0]instr,
-                output wire [3:0]oprnd,
-                output wire [7:0]program_byte /*sale de program ROM
-                                              y entra a Fetch*/);
-                                                      
-    wire [11:0]cont;
-
-cont12 a(clk, reset, en_PC, loact, load, cont);
-rom_mem b(cont, program_byte);
-FFD8 c(clk, reset, en_Fetch, program_byte, instr, oprnd);
-
-endmodule

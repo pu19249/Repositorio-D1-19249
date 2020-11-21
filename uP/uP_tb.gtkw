@@ -1,58 +1,67 @@
 [*]
 [*] GTKWave Analyzer v3.3.77 (w)1999-2016 BSI
-[*] Sat Nov 21 16:21:04 2020
+[*] Sat Nov 21 21:31:16 2020
 [*]
 [dumpfile] "C:\Users\jpu20\Documents\GitHub\Repositorio D1 19249\uP\uP_tb.vcd"
-[dumpfile_mtime] "Sat Nov 21 16:15:06 2020"
-[dumpfile_size] 17511
+[dumpfile_mtime] "Sat Nov 21 19:58:30 2020"
+[dumpfile_size] 50701
 [savefile] "C:\Users\jpu20\Documents\GitHub\Repositorio D1 19249\uP\uP_tb.gtkw"
 [timestart] 0
-[size] 1000 700
-[pos] -1 -1
-*-4.000000 25 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 1280 1001
+[pos] 1885 -35
+*-5.000000 48 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] testbench.
-[treeopen] testbench.uPmodule.
 [sst_width] 197
-[signals_width] 274
+[signals_width] 198
 [sst_expanded] 1
-[sst_vpaned_height] 189
+[sst_vpaned_height] 295
 @28
+[color] 1
 testbench.clock
+[color] 2
 testbench.reset
+[color] 3
 testbench.phase
 @22
+[color] 5
 testbench.PC[11:0]
+[color] 7
 testbench.program_byte[7:0]
+[color] 6
 testbench.instr[3:0]
+[color] 6
 testbench.oprnd[3:0]
 @28
+[color] 1
 testbench.c_flag
+[color] 1
 testbench.z_flag
 @22
+[color] 3
 testbench.data_bus[3:0]
+[color] 4
 testbench.accu[3:0]
 testbench.FF_out[3:0]
+@c00022
+[color] 2
 testbench.pushbuttons[3:0]
+@28
+(0)testbench.pushbuttons[3:0]
+(1)testbench.pushbuttons[3:0]
+(2)testbench.pushbuttons[3:0]
+(3)testbench.pushbuttons[3:0]
+@1401200
+-group_end
+@22
+[color] 2
 testbench.address_RAM[11:0]
+[color] 3
 testbench.uPmodule.control_signals[12:0]
 @420
+[color] 1
 testbench.nota
 testbench.memoryDelay
 testbench.jumpDelay
-@28
-testbench.uPmodule.fetch.clk
-testbench.uPmodule.fetch.reset
-@22
-testbench.uPmodule.decode.address[6:0]
-testbench.uPmodule.decode.signals[12:0]
-@28
-testbench.uPmodule.fetch.clk
-testbench.uPmodule.fetch.reset
-testbench.uPmodule.fetch.En
-@22
-testbench.uPmodule.fetch.D8[7:0]
-testbench.uPmodule.fetch.Q8a[3:0]
-@23
-testbench.uPmodule.fetch.Q8b[3:0]
+testbench.nota
 [pattern_trace] 1
 [pattern_trace] 0
