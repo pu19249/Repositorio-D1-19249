@@ -1,18 +1,18 @@
 [*]
 [*] GTKWave Analyzer v3.3.77 (w)1999-2016 BSI
-[*] Sat Nov 21 21:31:16 2020
+[*] Sat Nov 21 22:56:29 2020
 [*]
 [dumpfile] "C:\Users\jpu20\Documents\GitHub\Repositorio D1 19249\uP\uP_tb.vcd"
-[dumpfile_mtime] "Sat Nov 21 19:58:30 2020"
+[dumpfile_mtime] "Sat Nov 21 22:52:47 2020"
 [dumpfile_size] 50701
 [savefile] "C:\Users\jpu20\Documents\GitHub\Repositorio D1 19249\uP\uP_tb.gtkw"
 [timestart] 0
 [size] 1280 1001
-[pos] 1885 -35
-*-5.000000 48 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-5.000000 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] testbench.
 [sst_width] 197
-[signals_width] 198
+[signals_width] 235
 [sst_expanded] 1
 [sst_vpaned_height] 295
 @28
@@ -58,10 +58,9 @@ testbench.address_RAM[11:0]
 [color] 3
 testbench.uPmodule.control_signals[12:0]
 @420
-[color] 1
-testbench.nota
 testbench.memoryDelay
 testbench.jumpDelay
+[color] 1
 testbench.nota
 [pattern_trace] 1
 [pattern_trace] 0
